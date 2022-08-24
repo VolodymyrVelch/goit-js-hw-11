@@ -65,3 +65,15 @@ body {
 .load-more:focus {
   background-color: orchid;
 }
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+}
+.photo-card {
+  padding: 10px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+}

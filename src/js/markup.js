@@ -1,17 +1,35 @@
-<div class="photo-card">
-  <img src="" alt="" loading="lazy" />
+export { renderMarkup };
+
+const renderMarkup = function (items) {
+  return items
+    .map(
+      ({
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => `<div class="photo-card">
+  <a class='link' href='${largeImageURL}'>
+  <img src="${webformatURL}" alt="${tags}" loading="lazy"  width='300' height='200'/>
+  </a>
   <div class="info">
     <p class="info-item">
-      <b>Likes</b>
+      Likes: <b>${likes}</b>
     </p>
     <p class="info-item">
-      <b>Views</b>
+      Views: <b>${views}</b>
     </p>
     <p class="info-item">
-      <b>Comments</b>
+      Comments: <b>${comments}</b>
     </p>
     <p class="info-item">
-      <b>Downloads</b>
+       Downloads: <b>${downloads}</b>
     </p>
   </div>
-</div>;
+</div>`
+    )
+    .join('');
+};
