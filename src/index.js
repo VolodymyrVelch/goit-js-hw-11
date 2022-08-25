@@ -5,19 +5,20 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import axios from 'axios';
 import { renderMarkup } from './js/markup';
 
+const PHOTO_PER_PAGE = 40;
 const NOTIFY_OPTIONS = {
   timeout: 1000,
   showOnlyTheLastOne: true,
   clickToClose: true,
 };
 
-const DEFAULT_CURRENT_PAGE = 1;
-const PHOTO_PER_PAGE = 40;
-
 const refs = {
+  sbmBtn: document.querySelector('#search-btn'),
   form: document.querySelector('.search-form'),
   galleryMarkup: document.querySelector('.gallery'),
   link: document.querySelector('.link'),
+
+  // loadMore: document.querySelector('.load-more'),
 };
 let query = '';
 let page = 1;
@@ -35,20 +36,30 @@ const fetchData = () => {
     .then(({ data }) => {
       items = data.hits;
       const markupGallery = renderMarkup(items);
-      refs.galleryMarkup.innerHTML = '';
-      refs.galleryMarkup.innerHTML = markupGallery;
+      refs.galleryMarkup.insertAdjacentHTML('beforeend', markupGallery);
       lightbox();
       if (items.length > 0) {
         let itemQuantity = data.totalHits;
         foundImg(itemQuantity);
       } else if (items.length <= 0) {
+        refs.sbmBtn.disabled = true;
         noMaches();
       }
     })
     .catch(error => console.log(error));
 };
 
+function loadMore(e) {
+  page += 1;
+  fetchData();
+}
+
 // ++++++++++++++++++++++++++++++++++++++
+const handleScroll = e => {
+  if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight) {
+    loadMore();
+  }
+};
 
 // ініціалізуємо lightbox  для відображення галереї картинок
 function lightbox() {
@@ -56,7 +67,7 @@ function lightbox() {
     fadeSpeed: '250',
     scrollZoom: 'true',
     animationSpeed: '250',
-  });
+  }).refresh();
 }
 // Notiflix інформування  про кількість знайдених картинок
 function foundImg(itemQuantity) {
@@ -65,10 +76,25 @@ function foundImg(itemQuantity) {
     NOTIFY_OPTIONS
   );
 }
-// Notiflix інформування запитуваної внфо не знайдено
+//інформування про те  що поле не повинно бути пустим
+function emptySearch() {
+  Notiflix.Notify.warning(
+    `You should type request to recieve info`,
+    NOTIFY_OPTIONS
+  );
+}
+
+// Notiflix інформування запитуваної інфо не знайдено
 function noMaches() {
   Notiflix.Notify.failure(
     `Sorry there are no images maching your search query. Please try again`,
+    NOTIFY_OPTIONS
+  );
+}
+
+function endContent() {
+  Notiflix.Notify.failure(
+    `"We're sorry, but you've reached the end of search results."`,
     NOTIFY_OPTIONS
   );
 }
@@ -77,8 +103,18 @@ function noMaches() {
 
 const onSubmit = e => {
   e.preventDefault();
+  page = 1;
+  // if ((query = e.target.searchQuery.value)) {
+  //   return;
+  // }
+  refs.galleryMarkup.innerHTML = '';
   query = e.target.searchQuery.value;
+  if (!query) {
+    emptySearch();
+    return;
+  }
   fetchData();
 };
 
 refs.form.addEventListener('submit', onSubmit);
+refs.galleryMarkup.addEventListener('scroll', handleScroll);
