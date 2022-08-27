@@ -16,7 +16,6 @@ const fetchData = async (query, page) => {
 const fetchDataMore = async q => {
   morePage += 1;
   const nextPage = await fetchData(q, morePage);
-  console.log(nextPage);
   return nextPage;
 };
 

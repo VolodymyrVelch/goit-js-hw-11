@@ -34,7 +34,6 @@ async function onSubmit(e) {
   // функцію для отримання даних через AXIOS
   const data = await fetchData(query, page);
   items = data.hits;
-
   const markupGallery = renderMarkup(items);
   refs.galleryMarkup.insertAdjacentHTML('beforeend', markupGallery);
   lightbox();
@@ -48,21 +47,30 @@ async function onSubmit(e) {
       refs.sbmBtn.disabled = true;
       noMaches();
     }
+    if (PHOTO_PER_PAGE > items.length) {
+      endContent();
+      refs.loadMore.classList.remove('show');
+      return;
+    }
   } catch (error) {
     console.log(error);
   }
 }
+let curentPg = 1;
 // отримуємо та рендеримо  більше даних (якщо такі доступні)
 async function onBtnLoadMore() {
   const data = await fetchDataMore(query);
   let moreItems = data.hits;
   const markupGallery = renderMarkup(moreItems);
   refs.galleryMarkup.insertAdjacentHTML('beforeend', markupGallery);
-  lightbox().refresh();
+  lightbox();
+  const totalPages = Math.ceil(data.totalHits / PHOTO_PER_PAGE);
+  page += 1;
+
   try {
     // по умові  якщо  контент  для завантаження по даній темі  закінчився виводимо повідомлення та
     // приховуємо кнопку  "загрузити більше"
-    if (PHOTO_PER_PAGE > data.hits) {
+    if (page === totalPages) {
       endContent();
       refs.loadMore.classList.remove('show');
       return;
